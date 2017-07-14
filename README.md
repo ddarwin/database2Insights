@@ -1,7 +1,8 @@
 # database2Insights
 
 ## Description
-
+A Node.js script that reads a MySQL database and sends the rows as customer Events to New Relic Insights using the Node.js Agent API. 
+  
 ## Installation
 
 1. Unzip or install the repo
