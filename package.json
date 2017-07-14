@@ -1,0 +1,16 @@
+{
+  "name": "readmysql",
+  "version": "1.0.0",
+  "description": "Script to read a MySQL database",
+  "main": "MySQL2Insights.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Don Darwin",
+  "license": "ISC",
+  "dependencies": {
+    "mysql": "^2.13.0",
+    "newrelic": "^1.40.0",
+    "request": "^2.81.0"
+  }
+}
