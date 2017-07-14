@@ -12,14 +12,14 @@ var con = mysql.createConnection({
 
 // Global variables we'll need
 var config = {
-  "EVENT_NAME": "Cloud_Monitor",
-  "ACCOUNT_ID": "650703",   // Your New Relic account ID (can be found in URL http://rpm.newrelic.com/accounts/<account_id>)
-  "INSERT_KEY_INSIGHTS": "2upxi_cjv_6FpfljxxT3npJEfBFBUx0v",
-  "QUERY_KEY_INSIGHTS": "jPbIpgk470El-z6Rvdl8dRgxl9huQKhT",
+  "EVENT_NAME": "Cloud_Monitor",   // The name for the New Relic Insights events
+  "ACCOUNT_ID": "650703",          // Your New Relic account ID (can be found in URL http://rpm.newrelic.com/accounts/<account_id>)
+  "INSERT_KEY_INSIGHTS": "2upxi_cjv_6FpfljxxT3npJEfBFBUx0v",    // Currently not used
+  "QUERY_KEY_INSIGHTS": "jPbIpgk470El-z6Rvdl8dRgxl9huQKhT",     // Currently not used
 };
 
 // Setup the Insights insert options
-//      This is here for future use of Insights REST API instead of Agent API
+//      Here for future use of the Insights Insert API
 var insertOptions = {
     uri: 'https://insights-collector.newrelic.com/v1/accounts/' + config.ACCOUNT_ID + '/events',
     headers: {'X-Query-Key': config.INSERT_KEY_INSIGHTS},
@@ -28,13 +28,14 @@ var insertOptions = {
 };
 
 // Query the last timestamp from Insights
+//      Here for future use of the Insights Query API
 var maxTimeOpts = {
     uri: 'https://insights-api.newrelic.com/v1/accounts/' + config.ACCOUNT_ID + '/query',
     headers: {'Accept': 'application/json', 'X-Query-Key': config.QUERY_KEY_INSIGHTS},
     qs: {'nrql': 'SELECT max(timestamp) FROM ' + config.EVENT_NAME + ' SINCE 1 day ago'}
 };
 
-var pollingIntervalInSecs = 5;
+var pollingIntervalInSecs = 30;
 var lastTimestamp = new Date(0);
 var tableName = 'requests';         // MySQL table name to query
 var maxRows = 200;                    // maximum rows to retrieve in single query.
@@ -71,8 +72,6 @@ function readDatabase (connection) {
             eventDataArr.push(eventData);
 
         }
-
-        // console.log("Event Data Arr is "+JSON.stringify(eventDataArr));
     });
 }
 
