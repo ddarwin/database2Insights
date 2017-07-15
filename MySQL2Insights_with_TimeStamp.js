@@ -5,8 +5,8 @@ var request = require('request');
 
 var con = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "MyNewPass",
+  user: "myuser",
+  password: "mypass",
   database: "Cloud_Monitor"
 });
 
@@ -48,7 +48,7 @@ var eventData = {};
 
 // The getLastTimeStamp function will retrieve the last timestamp or date field from the New Relic Insights events
 //  It is there to handle a restart of this utility when it stops
-//  The prototype uses a UTC date format, 
+//  The prototype uses a UTC date format, this may need to be changed to match the timestamp format from the database
 function getLastTimeStamp(callback) {
         // console.log("Max Time Opts is "+JSON.stringify(maxTimeOpts));
         request(maxTimeOpts, function (error, response, body){

@@ -5,8 +5,8 @@ var request = require('request');
 
 var con = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "MyNewPass",
+  user: "myuser",
+  password: "mypass",
   database: "Cloud_Monitor"
 });
 
@@ -35,11 +35,10 @@ var maxTimeOpts = {
     qs: {'nrql': 'SELECT max(timestamp) FROM ' + config.EVENT_NAME + ' SINCE 1 day ago'}
 };
 
-var pollingIntervalInSecs = 30;
-var lastTimestamp = new Date(0);
+var pollingIntervalInSecs = 15;
+var lastTimestamp = '';
 var tableName = 'requests';         // MySQL table name to query
 var maxRows = 200;                    // maximum rows to retrieve in single query.
-var sqlSelect = "SELECT * FROM "+tableName+" LIMIT "+maxRows;
 
 // Modify the eventData object with the attribute names you want to send to Insights
 // Then map the data from the table row into the object
@@ -56,6 +55,9 @@ function openDatabase () {
 
 function readDatabase (connection) {
     var eventDataArr = [];
+
+    console.log('Last timestamp = '+lastTimestamp);
+    var sqlSelect = "SELECT * FROM "+tableName+" WHERE timestamp > '"+ lastTimestamp+"' LIMIT "+maxRows;
     console.log("SQL is "+ sqlSelect);
  
     connection.query(sqlSelect, function (err, result, fields) {
@@ -63,7 +65,7 @@ function readDatabase (connection) {
 
         for (var i = 0; i < result.length; i++) {
 
-            lastTimestamp = result[i].timestamp
+            lastTimestamp = result[i].timestamp;
             eventData = result[i];
 
             console.log("eventData is "+JSON.stringify(eventData));
