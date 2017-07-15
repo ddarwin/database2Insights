@@ -34,7 +34,7 @@ var maxTimeOpts = {
     qs: {'nrql': 'SELECT max(timestamp) FROM ' + config.EVENT_NAME + ' SINCE 1 day ago'}
 };
 
-var pollingIntervalInSecs = 5;
+var pollingIntervalInSecs = 15;
 var lastTimestamp = new Date(0);
 console.log("Initial date set to "+lastTimestamp);
 var tableName = 'requests';         // MySQL table name to query
