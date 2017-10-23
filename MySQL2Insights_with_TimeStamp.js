@@ -5,18 +5,19 @@ var request = require('request');
 
 var con = mysql.createConnection({
   host: "localhost",
-  user: "myuser",
-  password: "mypass",
+  user: "username",
+  password: "password",
   database: "Cloud_Monitor"
 });
 
 // Global variables we'll need
 var config = {
-  "EVENT_NAME": "Cloud_Monitor",
-  "ACCOUNT_ID": "650703",   // Your New Relic account ID (can be found in URL http://rpm.newrelic.com/accounts/<account_id>)
-  "INSERT_KEY_INSIGHTS": "2upxi_cjv_6FpfljxxT3npJEfBFBUx0v",
-  "QUERY_KEY_INSIGHTS": "jPbIpgk470El-z6Rvdl8dRgxl9huQKhT",
+  "EVENT_NAME": "Cloud_Monitor",   // The name for the New Relic Insights events
+  "ACCOUNT_ID": "<account_id_here>",          // Your New Relic account ID (can be found in URL http://rpm.newrelic.com/accounts/<account_id>)
+  "INSERT_KEY_INSIGHTS": "<Insights_Insert_Key>",    // For future use
+  "QUERY_KEY_INSIGHTS": "<Insights_Query_Key>",     // For future use
 };
+
 
 // Setup the Insights insert options
 //      This is here for future use of Insights REST API instead of Agent API
@@ -34,7 +35,7 @@ var maxTimeOpts = {
     qs: {'nrql': 'SELECT max(timestamp) FROM ' + config.EVENT_NAME + ' SINCE 1 day ago'}
 };
 
-var pollingIntervalInSecs = 15;
+var pollingIntervalInSecs = 30;
 var lastTimestamp = new Date(0);
 console.log("Initial date set to "+lastTimestamp);
 var tableName = 'requests';         // MySQL table name to query
@@ -46,6 +47,17 @@ var sqlSelect = "SELECT * FROM "+tableName;
 // Note: the event JSON must be flat. Not multidimensional. 
 var eventData = {};
 
+// use a function for the exact format desired...
+function ISODateString(d){
+  function pad(n){return n<10 ? '0'+n : n}
+  return d.getFullYear()+'-'
+      + pad(d.getMonth()+1)+'-'
+      + pad(d.getDate()) +' '
+      + pad(d.getHours())+':'
+      + pad(d.getMinutes())+':'
+      + pad(d.getSeconds())
+}
+
 // The getLastTimeStamp function will retrieve the last timestamp or date field from the New Relic Insights events
 //  It is there to handle a restart of this utility when it stops
 //  The prototype uses a UTC date format, this may need to be changed to match the timestamp format from the database
@@ -56,11 +68,12 @@ function getLastTimeStamp(callback) {
             var results = JSON.parse(body);
 
             // Convert epoch data to UTC format
-            var maxTimestamp = results.results[0].max;
+            var maxTimestamp = Date(results.results[0].max);
+            var isoDate = ISODateString(maxTimestamp)
             
             if (maxTimestamp != 0) {
-                lastTimestamp = maxTimestamp;
-                sqlSelect += ' where timestamp > '+lastTimestamp+" LIMIT "+maxRows;
+              //  lastTimestamp = maxTimestamp;
+                sqlSelect += " where timestamp > '"+isoDate+"' LIMIT "+maxRows;
             } else {
                 sqlSelect += " where timestamp >  LIMIT "+maxRows;
             }

@@ -5,15 +5,15 @@ var request = require('request');
 
 var con = mysql.createConnection({
   host: "localhost",
-  user: "myuser",
-  password: "mypass",
+  user: "root",
+  password: "MyNewPass",
   database: "Cloud_Monitor"
 });
 
 // Global variables we'll need
 var config = {
   "EVENT_NAME": "Cloud_Monitor",   // The name for the New Relic Insights events
-  "ACCOUNT_ID": "650703",          // Your New Relic account ID (can be found in URL http://rpm.newrelic.com/accounts/<account_id>)
+  "ACCOUNT_ID": "1606862",          // Your New Relic account ID (can be found in URL http://rpm.newrelic.com/accounts/<account_id>)
   "INSERT_KEY_INSIGHTS": "2upxi_cjv_6FpfljxxT3npJEfBFBUx0v",    // Currently not used
   "QUERY_KEY_INSIGHTS": "jPbIpgk470El-z6Rvdl8dRgxl9huQKhT",     // Currently not used
 };
@@ -35,7 +35,7 @@ var maxTimeOpts = {
     qs: {'nrql': 'SELECT max(timestamp) FROM ' + config.EVENT_NAME + ' SINCE 1 day ago'}
 };
 
-var pollingIntervalInSecs = 15;
+var pollingIntervalInSecs = 5;
 var lastTimestamp = '';
 var tableName = 'requests';         // MySQL table name to query
 var maxRows = 200;                    // maximum rows to retrieve in single query.
@@ -53,11 +53,25 @@ function openDatabase () {
     return con;
 }
 
+/* use a function for the exact format desired... */
+function ISODateString(d){
+  function pad(n){return n<10 ? '0'+n : n}
+  return d.getFullYear()+'-'
+      + pad(d.getMonth()+1)+'-'
+      + pad(d.getDate()) +' '
+      + pad(d.getHours())+':'
+      + pad(d.getMinutes())+':'
+      + pad(d.getSeconds())
+}
+
 function readDatabase (connection) {
     var eventDataArr = [];
 
-    console.log('Last timestamp = '+lastTimestamp);
-    var sqlSelect = "SELECT * FROM "+tableName+" WHERE timestamp > '"+ lastTimestamp+"' LIMIT "+maxRows;
+    if (lastTimestamp == '') {
+    	isoDate = '';
+    	};
+    	
+    var sqlSelect = "SELECT * FROM "+tableName+" WHERE timestamp > '"+isoDate+"' LIMIT "+maxRows;
     console.log("SQL is "+ sqlSelect);
  
     connection.query(sqlSelect, function (err, result, fields) {
@@ -66,12 +80,20 @@ function readDatabase (connection) {
         for (var i = 0; i < result.length; i++) {
 
             lastTimestamp = result[i].timestamp;
+            isoDate = ISODateString(lastTimestamp);
+            console.log("Timestamp value is "+isoDate);
+
             eventData = result[i];
 
             console.log("eventData is "+JSON.stringify(eventData));
             newrelic.recordCustomEvent(config.EVENT_NAME, eventData);
-
-            eventDataArr.push(eventData);
+            
+            /* For use with Insights Insert API (not currently used) 
+            eventData["eventType"] = config.EVENT_NAME;
+			eventDataArr.push(eventData);
+			console.log("Event Data Array is "+JSON.stringify(eventDataArr));
+			*/
+	
 
         }
     });
