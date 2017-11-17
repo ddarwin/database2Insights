@@ -18,7 +18,6 @@ var config = {
   "QUERY_KEY_INSIGHTS": "<Insights_Query_Key>",     // For future use
 };
 
-
 // Setup the Insights insert options
 //      This is here for future use of Insights REST API instead of Agent API
 var insertOptions = {
@@ -35,7 +34,7 @@ var maxTimeOpts = {
     qs: {'nrql': 'SELECT max(timestamp) FROM ' + config.EVENT_NAME + ' SINCE 1 day ago'}
 };
 
-var pollingIntervalInSecs = 30;
+var pollingIntervalInSecs = 15;
 var lastTimestamp = new Date(0);
 console.log("Initial date set to "+lastTimestamp);
 var tableName = 'requests';         // MySQL table name to query
@@ -47,33 +46,23 @@ var sqlSelect = "SELECT * FROM "+tableName;
 // Note: the event JSON must be flat. Not multidimensional. 
 var eventData = {};
 
-// use a function for the exact format desired...
-function ISODateString(d){
-  function pad(n){return n<10 ? '0'+n : n}
-  return d.getFullYear()+'-'
-      + pad(d.getMonth()+1)+'-'
-      + pad(d.getDate()) +' '
-      + pad(d.getHours())+':'
-      + pad(d.getMinutes())+':'
-      + pad(d.getSeconds())
-}
-
 // The getLastTimeStamp function will retrieve the last timestamp or date field from the New Relic Insights events
 //  It is there to handle a restart of this utility when it stops
 //  The prototype uses a UTC date format, this may need to be changed to match the timestamp format from the database
 function getLastTimeStamp(callback) {
-        // console.log("Max Time Opts is "+JSON.stringify(maxTimeOpts));
+        console.log("Max Time Opts is "+JSON.stringify(maxTimeOpts));
         request(maxTimeOpts, function (error, response, body){
+        console.log("Return code is "+ error);
         if (!error && response.statusCode == 200) {
             var results = JSON.parse(body);
 
             // Convert epoch data to UTC format
-            var maxTimestamp = Date(results.results[0].max);
-            var isoDate = ISODateString(maxTimestamp)
+            var maxTimestamp = results.results[0].max;
+            console.log("Max timestamp is "+maxTimestamp);
             
             if (maxTimestamp != 0) {
-              //  lastTimestamp = maxTimestamp;
-                sqlSelect += " where timestamp > '"+isoDate+"' LIMIT "+maxRows;
+                lastTimestamp = maxTimestamp;
+                sqlSelect += ' where timestamp > '+lastTimestamp+" LIMIT "+maxRows;
             } else {
                 sqlSelect += " where timestamp >  LIMIT "+maxRows;
             }
