@@ -14,8 +14,8 @@ var con = mysql.createConnection({
 var config = {
   "EVENT_NAME": "Cloud_Monitor",   // The name for the New Relic Insights events
   "ACCOUNT_ID": "1606862",          // Your New Relic account ID (can be found in URL http://rpm.newrelic.com/accounts/<account_id>)
-  "INSERT_KEY_INSIGHTS": "2upxi_cjv_6FpfljxxT3npJEfBFBUx0v",    // Currently not used
-  "QUERY_KEY_INSIGHTS": "jPbIpgk470El-z6Rvdl8dRgxl9huQKhT",     // Currently not used
+  "INSERT_KEY_INSIGHTS": "REPLACE_THIS_WITH_INSIGHTS_INSERT_KEY",    // Currently not used
+  "QUERY_KEY_INSIGHTS": "REPLACE_THIS_WITH_INSIGHTS_QUERY_KEY",     // Currently not used
 };
 
 // Setup the Insights insert options
